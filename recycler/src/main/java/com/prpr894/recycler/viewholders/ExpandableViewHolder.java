@@ -6,6 +6,11 @@ import android.widget.TextView;
 
 public class ExpandableViewHolder extends CommonBaseViewHolder {
     private View itemView;
+
+    public View getItemView() {
+        return itemView;
+    }
+
     public ExpandableViewHolder(@NonNull View itemView) {
         super(itemView);
         this.itemView = itemView;
