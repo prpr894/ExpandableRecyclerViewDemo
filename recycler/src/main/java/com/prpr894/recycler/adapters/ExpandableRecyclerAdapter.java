@@ -29,6 +29,8 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     private static final int INT_DEFAULT = 23333;
     private int mExpandClickResId = INT_DEFAULT;
 
+    private RecyclerView mRecyclerView;
+
     public ExpandableRecyclerAdapter(int PResId, int CResId, List<P> pList, Context context) {
         mPResId = PResId;
         mCResId = CResId;
@@ -64,10 +66,10 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         if (mExpandableBeanList.get(position).getResId() == mPResId) {
             if (mExpandClickResId == INT_DEFAULT) {
                 vh.getItemView().setOnClickListener(this);
-                vh.getItemView().setTag(position);
+                vh.getItemView().setTag(vh);
             } else {
                 vh.getViewById(mExpandClickResId).setOnClickListener(this);
-                vh.getViewById(mExpandClickResId).setTag(position);
+                vh.getViewById(mExpandClickResId).setTag(vh);
             }
         }
         onBindViewHolderNow(mExpandableBeanList.get(position).getP(), vh, position, mExpandableBeanList.get(position).getResId());
@@ -83,18 +85,56 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         return mExpandableBeanList.size();
     }
 
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        mRecyclerView=recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        mRecyclerView=null;
+    }
+
     @Override
     public void onClick(View view) {
-        int position = (int) view.getTag();
+        ExpandableViewHolder vh = (ExpandableViewHolder) view.getTag();
+        int position = vh.getAdapterPosition();
         onExpand(position);
     }
 
     public void onExpand(int position) {
         //TODO 展开或者收起
         Log.d("flag", "点击了： " + position);
+        if (mExpandableBeanList.get(position).getStrType().equals(TYPE_PARENT)) {
+            int expand = isExpand(position);
+            if (expand==-1) {
+                ExpanableBean bean = new ExpanableBean();
+                bean.setP(mExpandableBeanList.get(position).getP());
+                bean.setIntPosition(mExpandableBeanList.get(position).getIntPosition());
+                bean.setStrType(TYPE_CHILD);
+                bean.setResId(mCResId);
+                mExpandableBeanList.add(position+1, bean);
+                notifyItemInserted(position+1);
+                mRecyclerView.smoothScrollToPosition(position+1);
 
+            } else {
+                mExpandableBeanList.remove(expand);
+                notifyItemRemoved(expand);
+            }
+        }
+    }
 
-
+    private int isExpand(int position) {
+        for (int i = 0; i < mExpandableBeanList.size(); i++) {
+            if (mExpandableBeanList.get(i).getStrType().equals(TYPE_CHILD)
+                    && mExpandableBeanList.get(i).getIntPosition() == mExpandableBeanList.get(position).getIntPosition()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 
