@@ -16,8 +16,8 @@ import java.util.List;
 
 public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<ExpandableViewHolder> implements View.OnClickListener {
 
-    public static final String TYPE_PARENT = "P";
-    public static final String TYPE_CHILD = "C";
+    private static final String TYPE_PARENT = "P";
+    private static final String TYPE_CHILD = "C";
     private int mPResId;
     private int mCResId;
     private List<P> mPList;
@@ -29,7 +29,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     private OnExpandListener mOnExpandListener;
     private int mExpandResId;
 
-    public void setOnExpandListener(int expandResId, OnExpandListener onExpandListener) {
+    protected void setOnExpandListener(int expandResId, OnExpandListener onExpandListener) {
         mExpandResId=expandResId;
         mOnExpandListener = onExpandListener;
     }
