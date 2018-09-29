@@ -46,15 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
         MyExRecyclerAdapter adapter = new MyExRecyclerAdapter(list, this);
         mRecyclerView.setAdapter(adapter);
-//        adapter.setOnExpandListener(R.id.img_item, new OnExpandListener() {
-//            @Override
-//            public void onExpand(boolean isExpanding, View view, int position) {
-//                if (isExpanding) {
-//                    view.setRotation(90);
-//                } else {
-//                    view.setRotation(0);
-//                }
-//            }
-//        });
+
     }
 }
