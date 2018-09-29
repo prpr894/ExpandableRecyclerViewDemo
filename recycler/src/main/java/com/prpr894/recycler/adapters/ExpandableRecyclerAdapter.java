@@ -22,7 +22,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     private int mCResId;
     private List<P> mPList;
     private Context mContext;
-    private List<ExpanableBean> mExpandableBeanList;
+    private List<ExpandableBean> mExpandableBeanList;
     private static final int INT_DEFAULT = 23333;
     private int mExpandClickResId = INT_DEFAULT;
     private RecyclerView mRecyclerView;
@@ -30,7 +30,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     private int mExpandResId;
 
     protected void setOnExpandListener(int expandResId, OnExpandListener onExpandListener) {
-        mExpandResId=expandResId;
+        mExpandResId = expandResId;
         mOnExpandListener = onExpandListener;
     }
 
@@ -41,7 +41,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         mContext = context;
         mExpandableBeanList = new ArrayList<>();
         for (int i = 0; i < mPList.size(); i++) {
-            ExpanableBean bean = new ExpanableBean();
+            ExpandableBean bean = new ExpandableBean();
             bean.setP(mPList.get(i));
             bean.setIntPosition(i);
             bean.setStrType(TYPE_PARENT);
@@ -62,7 +62,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         return new ExpandableViewHolder(view);
     }
 
-    public abstract void onBindViewHolderNow(P p, ExpandableViewHolder vh, int position, int resId);
+    public abstract void onBindViewHolderNow(P p, ExpandableViewHolder vh, int position, int resId, ExpandFiled expandFiled);
 
     @Override
     public void onBindViewHolder(@NonNull ExpandableViewHolder vh, int position) {
@@ -75,7 +75,10 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
                 vh.getViewById(mExpandClickResId).setTag(vh);
             }
         }
-        onBindViewHolderNow(mExpandableBeanList.get(position).getP(), vh, position, mExpandableBeanList.get(position).getResId());
+        ExpandFiled expandFiled = new ExpandFiled();
+        expandFiled.setDataListPosition(mExpandableBeanList.get(position).getIntPosition());
+        expandFiled.setExpanded(mExpandableBeanList.get(position).isExpanded);
+        onBindViewHolderNow(mExpandableBeanList.get(position).getP(), vh, position, mExpandableBeanList.get(position).getResId(), expandFiled);
     }
 
     @Override
@@ -92,50 +95,74 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        mRecyclerView=recyclerView;
+        mRecyclerView = recyclerView;
     }
 
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        mRecyclerView=null;
+        mRecyclerView = null;
     }
 
     @Override
     public void onClick(View view) {
         ExpandableViewHolder vh = (ExpandableViewHolder) view.getTag();
         int position = vh.getAdapterPosition();
-        onExpand(position,vh);
+        onExpand(position, vh);
     }
 
-    public void onExpand(int position,ExpandableViewHolder vh) {
+    public void expandChild(ExpandableViewHolder vh) {
+        int position = vh.getAdapterPosition();
+        int expand = isExpand(position);
+        if (expand == -1) {
+            expand(position, vh);
+        }
+    }
+
+    public void onExpand(int position, ExpandableViewHolder vh) {
         //TODO 展开或者收起
         Log.d("flag", "点击了： " + position);
         if (mExpandableBeanList.get(position).getStrType().equals(TYPE_PARENT)) {
             int expand = isExpand(position);
-            if (expand==-1) {
-                ExpanableBean bean = new ExpanableBean();
-                bean.setP(mExpandableBeanList.get(position).getP());
-                bean.setIntPosition(mExpandableBeanList.get(position).getIntPosition());
-                bean.setStrType(TYPE_CHILD);
-                bean.setResId(mCResId);
-                mExpandableBeanList.add(position+1, bean);
-                notifyItemInserted(position+1);
-                mRecyclerView.smoothScrollToPosition(position+1);//此处的滚动动画可以自定义LayoutManager实现
-                if (mOnExpandListener!=null) {
-                    mOnExpandListener.onExpand(true,vh.getViewById(mExpandResId),position);
-                }
+            if (expand == -1) {
+                expand(position, vh);
             } else {
-                mExpandableBeanList.remove(expand);
-                notifyItemRemoved(expand);
-                if (mOnExpandListener!=null) {
-                    mOnExpandListener.onExpand(false,vh.getViewById(mExpandResId),position);
-                }
+                hide(position, vh, expand);
             }
         }
     }
 
+    private void hide(int position, ExpandableViewHolder vh, int expand) {
+        if (expand >= 1) {
+            mExpandableBeanList.get(expand - 1).setExpanded(true);
+        }
+        mExpandableBeanList.remove(expand);
+        notifyItemRemoved(expand);
+        if (mOnExpandListener != null) {
+            mOnExpandListener.onExpand(false, vh.getViewById(mExpandResId), position);
+        }
+    }
 
+    private void expand(int position, ExpandableViewHolder vh) {
+        ExpandableBean bean = new ExpandableBean();
+        bean.setP(mExpandableBeanList.get(position).getP());
+        bean.setIntPosition(mExpandableBeanList.get(position).getIntPosition());
+        bean.setStrType(TYPE_CHILD);
+        bean.setResId(mCResId);
+        mExpandableBeanList.add(position + 1, bean);
+        mExpandableBeanList.get(position).setExpanded(true);
+        notifyItemInserted(position + 1);
+        mRecyclerView.smoothScrollToPosition(position + 1);//此处的滚动动画可以自定义LayoutManager实现
+        if (mOnExpandListener != null) {
+            mOnExpandListener.onExpand(true, vh.getViewById(mExpandResId), position);
+        }
+    }
+
+
+    /**
+     * @param position 当前点击的条目的position
+     * @return -1为未展开状态，其他为已经展开的条目的position
+     */
     private int isExpand(int position) {
         for (int i = 0; i < mExpandableBeanList.size(); i++) {
             if (mExpandableBeanList.get(i).getStrType().equals(TYPE_CHILD)
@@ -146,12 +173,51 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         return -1;
     }
 
+    /**
+     * 记录一些属性的辅助类
+     */
+    public class ExpandFiled {
+        //对应原始数据的List的位置
+        private int mDataListPosition;
+        //是否为展开状态
+        private boolean mIsExpanded;
+        //...可以扩展其他属性
 
-    public class ExpanableBean {
+        public int getDataListPosition() {
+            return mDataListPosition;
+        }
+
+        public void setDataListPosition(int dataListPosition) {
+            mDataListPosition = dataListPosition;
+        }
+
+        public boolean isExpanded() {
+            return mIsExpanded;
+        }
+
+        public void setExpanded(boolean expanded) {
+            mIsExpanded = expanded;
+        }
+    }
+
+
+    /**
+     * 处理使用的自定义辅助类
+     */
+    public class ExpandableBean {
         private P mP;
         private String mStrType;
         private int mIntPosition;
         private int mResId;
+        private boolean isExpanded;
+
+        public boolean isExpanded() {
+            return isExpanded;
+        }
+
+        public void setExpanded(boolean expanded) {
+            isExpanded = expanded;
+        }
 
         public int getResId() {
             return mResId;

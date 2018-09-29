@@ -1,8 +1,12 @@
 package com.zrsoft.twolevelrecyclerviewdemo.adapters;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 
 import com.prpr894.recycler.adapters.ExpandableRecyclerAdapter;
 import com.prpr894.recycler.interfaces.OnExpandListener;
@@ -14,24 +18,49 @@ import java.util.List;
 
 public class MyExRecyclerAdapter extends ExpandableRecyclerAdapter<Teacher> implements OnExpandListener {
 
+    private Context mContext;
 
     public MyExRecyclerAdapter(List<Teacher> teachers, Context context) {
-        super(R.layout.item, R.layout.item_child, teachers, context);
+        super(R.layout.item, R.layout.child, teachers, context);
+        mContext = context;
         setExpandClickResId(R.id.img_item);//设置点击展开的按钮，在onBindViewHolderNow如果再次设置点击事件会覆盖，不设置默认是整个条目
-        setOnExpandListener(R.id.img_item,this);//设置展开监听
+        setOnExpandListener(R.id.img_item, this);//设置展开监听
     }
 
 
     @Override
-    public void onBindViewHolderNow(Teacher teacher, ExpandableViewHolder vh, int position, int resId) {
+    public void onBindViewHolderNow(Teacher teacher, final ExpandableViewHolder vh, int position, int resId, ExpandFiled expandFiled) {
         switch (resId) {
             case R.layout.item:
                 vh.setText(R.id.tv_item, teacher.getName());
                 ImageView imageView = (ImageView) vh.getViewById(R.id.img_item);
-                imageView.setImageResource(R.mipmap.ic_launcher);
+                imageView.setImageResource(R.drawable.ic_right);
+                //获取数据中存储的展开状态，回复ImageView因为复用导致的展开状态失效
+                animationState(expandFiled.isExpanded(), imageView);
+                RadioButton rbYes = (RadioButton) vh.getViewById(R.id.rb_yes_parent);
+                RadioButton rbNo = (RadioButton) vh.getViewById(R.id.rb_no_parent);
+                rbYes.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        expandChild(vh);
+                    }
+                });
+                rbNo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        expandChild(vh);
+                    }
+                });
+
                 break;
-            case R.layout.item_child:
-                vh.setText(R.id.tv_child, teacher.getStudent().getName());
+            case R.layout.child:
+                RecyclerView recyclerView = (RecyclerView) vh.getViewById(R.id.recycler_child);
+                Log.d("flag", " ----- List<Student> list的长度：" + teacher.getStudent().size());
+                recyclerView.setTag(vh);
+                if (((ExpandableViewHolder) recyclerView.getTag()).getAdapterPosition() == position) {
+                    MyAdapter adapter = new MyAdapter(teacher.getStudent(), mContext);
+                    recyclerView.setAdapter(adapter);
+                }
                 break;
         }
     }
@@ -39,6 +68,10 @@ public class MyExRecyclerAdapter extends ExpandableRecyclerAdapter<Teacher> impl
     @Override
     public void onExpand(boolean isExpanding, View view, int position) {
         //此处可以做动画
+        animationState(isExpanding, view);
+    }
+
+    private void animationState(boolean isExpanding, View view) {
         if (isExpanding) {
             view.setRotation(90);
         } else {

@@ -2,7 +2,9 @@ package com.zrsoft.twolevelrecyclerviewdemo.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.widget.ImageView;
+import android.util.Log;
+import android.widget.CompoundButton;
+import android.widget.RadioButton;
 
 import com.prpr894.recycler.adapters.BaseRecyclerAdapter;
 import com.prpr894.recycler.viewholders.BaseViewHolder;
@@ -14,12 +16,37 @@ import java.util.List;
 public class MyAdapter extends BaseRecyclerAdapter<Student> {
 
     public MyAdapter(List<Student> list, Context context) {
-        super(R.layout.item, list, context);
+        super(R.layout.item_child, list, context);
+        Log.d("flag", " ===== List<Student> list的长度：" + list.size());
     }
 
     @Override
-    public void onBindViewHolderNow(Student student, @NonNull BaseViewHolder holder, int i) {
-        ((ImageView) holder.getViewById(R.id.img_item)).setImageResource(R.mipmap.ic_launcher);
-        holder.setText(R.id.tv_item, student.getName());
+    public void onBindViewHolderNow(final Student student, @NonNull BaseViewHolder holder, int i) {
+        holder.setText(R.id.tv_child, student.getName());
+        RadioButton rbYes = (RadioButton) holder.getViewById(R.id.rb_yes);
+        RadioButton rbNo = (RadioButton) holder.getViewById(R.id.rb_no);
+        if (student.isYes()) {
+            rbYes.setChecked(true);
+        } else {
+            rbNo.setChecked(true);
+        }
+        rbYes.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    student.setYes(true);
+                }
+            }
+        });
+        rbNo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    student.setYes(false);
+                }
+            }
+        });
+
+
     }
 }

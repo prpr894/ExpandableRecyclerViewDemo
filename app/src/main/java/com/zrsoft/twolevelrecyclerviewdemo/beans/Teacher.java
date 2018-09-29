@@ -1,10 +1,20 @@
 package com.zrsoft.twolevelrecyclerviewdemo.beans;
 
+import java.util.List;
+
 public class Teacher {
 
     private String name;
-    private Student Student;
+    private List<Student> Student;
     private int Age;
+
+    public List<Student> getStudent() {
+        return Student;
+    }
+
+    public void setStudent(List<Student> student) {
+        Student = student;
+    }
 
     public String getName() {
         return name;
@@ -12,14 +22,6 @@ public class Teacher {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Student getStudent() {
-        return Student;
-    }
-
-    public void setStudent(Student student) {
-        Student = student;
     }
 
     public int getAge() {
