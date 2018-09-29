@@ -18,20 +18,14 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
 
     public static final String TYPE_PARENT = "P";
     public static final String TYPE_CHILD = "C";
-
     private int mPResId;
     private int mCResId;
-
     private List<P> mPList;
-
     private Context mContext;
-
     private List<ExpanableBean> mExpandableBeanList;
     private static final int INT_DEFAULT = 23333;
     private int mExpandClickResId = INT_DEFAULT;
-
     private RecyclerView mRecyclerView;
-
     private OnExpandListener mOnExpandListener;
     private int mExpandResId;
 
