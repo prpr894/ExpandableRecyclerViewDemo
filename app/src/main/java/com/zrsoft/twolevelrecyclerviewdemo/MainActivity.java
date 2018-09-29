@@ -3,7 +3,9 @@ package com.zrsoft.twolevelrecyclerviewdemo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
+import com.prpr894.recycler.interfaces.OnExpandListener;
 import com.zrsoft.twolevelrecyclerviewdemo.adapters.MyExRecyclerAdapter;
 import com.zrsoft.twolevelrecyclerviewdemo.beans.Student;
 import com.zrsoft.twolevelrecyclerviewdemo.beans.Teacher;
@@ -44,6 +46,15 @@ public class MainActivity extends AppCompatActivity {
 
         MyExRecyclerAdapter adapter = new MyExRecyclerAdapter(list, this);
         mRecyclerView.setAdapter(adapter);
-
+//        adapter.setOnExpandListener(R.id.img_item, new OnExpandListener() {
+//            @Override
+//            public void onExpand(boolean isExpanding, View view, int position) {
+//                if (isExpanding) {
+//                    view.setRotation(90);
+//                } else {
+//                    view.setRotation(0);
+//                }
+//            }
+//        });
     }
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.prpr894.recycler.interfaces.OnExpandListener;
 import com.prpr894.recycler.viewholders.ExpandableViewHolder;
 
 import java.util.ArrayList;
@@ -30,6 +31,14 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     private int mExpandClickResId = INT_DEFAULT;
 
     private RecyclerView mRecyclerView;
+
+    private OnExpandListener mOnExpandListener;
+    private int mExpandResId;
+
+    public void setOnExpandListener(int expandResId, OnExpandListener onExpandListener) {
+        mExpandResId=expandResId;
+        mOnExpandListener = onExpandListener;
+    }
 
     public ExpandableRecyclerAdapter(int PResId, int CResId, List<P> pList, Context context) {
         mPResId = PResId;
@@ -102,10 +111,10 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     public void onClick(View view) {
         ExpandableViewHolder vh = (ExpandableViewHolder) view.getTag();
         int position = vh.getAdapterPosition();
-        onExpand(position);
+        onExpand(position,vh);
     }
 
-    public void onExpand(int position) {
+    public void onExpand(int position,ExpandableViewHolder vh) {
         //TODO 展开或者收起
         Log.d("flag", "点击了： " + position);
         if (mExpandableBeanList.get(position).getStrType().equals(TYPE_PARENT)) {
@@ -118,14 +127,20 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
                 bean.setResId(mCResId);
                 mExpandableBeanList.add(position+1, bean);
                 notifyItemInserted(position+1);
-                mRecyclerView.smoothScrollToPosition(position+1);
-
+                mRecyclerView.smoothScrollToPosition(position+1);//此处的滚动动画可以自定义LayoutManager实现
+                if (mOnExpandListener!=null) {
+                    mOnExpandListener.onExpand(true,vh.getViewById(mExpandResId),position);
+                }
             } else {
                 mExpandableBeanList.remove(expand);
                 notifyItemRemoved(expand);
+                if (mOnExpandListener!=null) {
+                    mOnExpandListener.onExpand(false,vh.getViewById(mExpandResId),position);
+                }
             }
         }
     }
+
 
     private int isExpand(int position) {
         for (int i = 0; i < mExpandableBeanList.size(); i++) {
