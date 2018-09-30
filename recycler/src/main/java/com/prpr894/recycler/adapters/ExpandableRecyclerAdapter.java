@@ -120,8 +120,6 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
     }
 
     public void onExpand(int position, ExpandableViewHolder vh) {
-        //TODO 展开或者收起
-        Log.d("flag", "点击了： " + position);
         if (mExpandableBeanList.get(position).getStrType().equals(TYPE_PARENT)) {
             int expand = isExpand(position);
             if (expand == -1) {
@@ -134,7 +132,7 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
 
     private void hide(int position, ExpandableViewHolder vh, int expand) {
         if (expand >= 1) {
-            mExpandableBeanList.get(expand - 1).setExpanded(true);
+            mExpandableBeanList.get(expand - 1).setExpanded(false);
         }
         mExpandableBeanList.remove(expand);
         notifyItemRemoved(expand);

@@ -7,6 +7,24 @@ public class Teacher {
     private String name;
     private List<Student> Student;
     private int Age;
+    private boolean isYes;
+    private boolean canChange;
+
+    public boolean isCanChange() {
+        return canChange;
+    }
+
+    public void setCanChange(boolean canChange) {
+        this.canChange = canChange;
+    }
+
+    public boolean isYes() {
+        return isYes;
+    }
+
+    public void setYes(boolean yes) {
+        isYes = yes;
+    }
 
     public List<Student> getStudent() {
         return Student;

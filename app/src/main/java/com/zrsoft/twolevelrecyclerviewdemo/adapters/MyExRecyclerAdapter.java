@@ -29,7 +29,7 @@ public class MyExRecyclerAdapter extends ExpandableRecyclerAdapter<Teacher> impl
 
 
     @Override
-    public void onBindViewHolderNow(Teacher teacher, final ExpandableViewHolder vh, int position, int resId, ExpandFiled expandFiled) {
+    public void onBindViewHolderNow(final Teacher teacher, final ExpandableViewHolder vh, final int position, int resId, ExpandFiled expandFiled) {
         switch (resId) {
             case R.layout.item:
                 vh.setText(R.id.tv_item, teacher.getName());
@@ -37,20 +37,53 @@ public class MyExRecyclerAdapter extends ExpandableRecyclerAdapter<Teacher> impl
                 imageView.setImageResource(R.drawable.ic_right);
                 //获取数据中存储的展开状态，回复ImageView因为复用导致的展开状态失效
                 animationState(expandFiled.isExpanded(), imageView);
-                RadioButton rbYes = (RadioButton) vh.getViewById(R.id.rb_yes_parent);
-                RadioButton rbNo = (RadioButton) vh.getViewById(R.id.rb_no_parent);
+                final RadioButton rbYes = (RadioButton) vh.getViewById(R.id.rb_yes_parent);
+                final RadioButton rbNo = (RadioButton) vh.getViewById(R.id.rb_no_parent);
+                rbYes.setTag(vh);
+                rbNo.setTag(vh);
+
+                if (((ExpandableViewHolder) rbYes.getTag()).getAdapterPosition() == position && ((ExpandableViewHolder) rbNo.getTag()).getAdapterPosition() == position) {
+                    teacher.setCanChange(false);
+                    if (teacher.isYes()) {
+                        rbYes.setChecked(true);
+                    } else {
+                        rbNo.setChecked(true);
+                    }
+                }
+
                 rbYes.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        expandChild(vh);
+                        if (b) {
+                            if (((ExpandableViewHolder) rbYes.getTag()).getAdapterPosition() == position) {
+                                if (teacher.isCanChange()) {
+                                    expandChild(((ExpandableViewHolder) rbYes.getTag()));
+                                    teacher.setYes(true);
+                                } else {
+                                    teacher.setCanChange(true);
+                                }
+                            }
+                        }
                     }
                 });
+
+
                 rbNo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        expandChild(vh);
+                        if (b) {
+                            if (((ExpandableViewHolder) rbNo.getTag()).getAdapterPosition() == position) {
+                                if (teacher.isCanChange()) {
+                                    expandChild(((ExpandableViewHolder) rbNo.getTag()));
+                                    teacher.setYes(false);
+                                } else {
+                                    teacher.setCanChange(true);
+                                }
+                            }
+                        }
                     }
                 });
+
 
                 break;
             case R.layout.child:
