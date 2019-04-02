@@ -116,6 +116,8 @@ public abstract class ExpandableRecyclerAdapter<P> extends RecyclerView.Adapter<
         int expand = isExpand(position);
         if (expand == -1) {
             expand(position, vh);
+        }else {
+            notifyItemChanged(expand);
         }
     }
 
